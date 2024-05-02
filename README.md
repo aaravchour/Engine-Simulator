@@ -1,1 +1,0 @@
-A simple Engine Simulator using Python, with PyQt5 libraries. This is meant to help me in the future with CVs due to the competition between Computer Science jobs increasing, this will also help me with my Computer Science GCSEs.
