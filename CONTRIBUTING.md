@@ -9,7 +9,7 @@ Thank you for considering contributing to [Your Project Name]! We welcome contri
 2. **Clone your fork**: Clone your fork of the repository to your local machine using Git.
 
    ```bash
-   git clone https://github.com/[Your GitHub username]/[Your Project Name].git
+   git clone https://github.com/aaravchour/Engine-Simulator
    ```
 
 3. **Create a new branch**: Before you start working on your contribution, create a new branch based on the `main` or `master` branch. This will allow you to work on your changes without affecting the original codebase.
