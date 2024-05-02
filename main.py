@@ -6,6 +6,11 @@ from PyQt5.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget, QPushBut
 from PyQt5.QtCore import QTimer, Qt, QUrl
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 
+import sys
+sys.path.insert(0, 'Systems')
+
+from Systems.realism_system import RealismSystem
+
 
 
 class EngineSimulator(QWidget):
@@ -14,24 +19,47 @@ class EngineSimulator(QWidget):
 
         self.initUI()
 
-        self.accelerator_button.setEnabled(True)
-        
+        self.temperature = 25
+        self.fuel_level = 100
+        self.oil_level = 100
+        self.battery_level = 100
+
+        self.realism_system = RealismSystem(self)
+
     def initUI(self):
+        self.setWindowTitle('Engine Simulator')
+
+        self.vbox = QVBoxLayout()
+
         self.rpm_label = QLabel("RPM: 0", self)
+        self.vbox.addWidget(self.rpm_label)
+
+        self.temperature_label = QLabel("Temperature: 0", self)
+        self.vbox.addWidget(self.temperature_label)
+
+        self.fuel_label = QLabel("Fuel Level: 0", self)
+        self.vbox.addWidget(self.fuel_label)
+
+        self.oil_label = QLabel("Oil Level: 0", self)
+        self.vbox.addWidget(self.oil_label)
+
+        self.battery_label = QLabel("Battery Level: 0", self)
+        self.vbox.addWidget(self.battery_label)
+
+        self.health_label = QLabel("Engine Health: OK", self)
+        self.vbox.addWidget(self.health_label)
+
         self.accelerator_button = QPushButton("Start Engine", self)
+        self.vbox.addWidget(self.accelerator_button)
+
         self.throttle_slider = QSlider(Qt.Vertical)
         self.throttle_slider.setMinimum(0)
         self.throttle_slider.setMaximum(100)
+        self.vbox.addWidget(self.throttle_slider)
+
         self.rpm_meter = QProgressBar(self)
         self.rpm_meter.setMinimum(0)
         self.rpm_meter.setMaximum(8500)
-
-        self.accelerator_button.clicked.connect(self.accelerator)
-
-        self.vbox = QVBoxLayout()
-        self.vbox.addWidget(self.rpm_label)
-        self.vbox.addWidget(self.accelerator_button)
-        self.vbox.addWidget(self.throttle_slider)
         self.vbox.addWidget(self.rpm_meter)
 
         self.setLayout(self.vbox)
@@ -40,13 +68,12 @@ class EngineSimulator(QWidget):
         self.accelerator_pressed = False
         self.throttle = 0
 
-        self.timer = QTimer()
+        self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_rpm)
         self.timer.start(100)
 
         self.throttle_slider.valueChanged.connect(self.update_throttle)
 
-        self.setWindowTitle('Engine Simulator')
         self.show()
 
     def accelerator(self):
@@ -90,6 +117,9 @@ class EngineSimulator(QWidget):
 
         self.rpm_label.setText("RPM: " + str(self.engine_rpm))
         self.rpm_meter.setValue(self.engine_rpm)
+
+        if self.accelerator_pressed:
+            self.realism_system.update_all()
 
 
 if __name__ == '__main__':
