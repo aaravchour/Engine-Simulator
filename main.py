@@ -57,8 +57,12 @@ class EngineSimulator(QWidget):
         self.stop_button.clicked.connect(self.stop)
         self.vbox.addWidget(self.stop_button)
         self.stop_button.show()
-
-    playsound.playsound('engine_sound.wav')
+        
+        playsound.playsound('engine_sound.wav')
+        
+        self.timer_throttle = QTimer()
+        self.timer_throttle.timeout.connect(self.update_rpm)
+        self.timer_throttle.start(1000)
 
     def stop(self):
         self.accelerator_button.show()
