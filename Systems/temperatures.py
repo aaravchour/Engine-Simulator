@@ -1,4 +1,5 @@
 import random
+import sys
 
 class temperatures:
     def __init__(self, engine_simulator):

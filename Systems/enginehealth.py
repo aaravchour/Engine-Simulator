@@ -1,11 +1,21 @@
 import random
 
+import sys
+sys.path.insert(0, 'Systems')
+
+from temperatures import temperatures
+from fuel import fuel
+from oil import oil
+from battery import battery
+
 class enginehealth:
     def __init__(self, engine_simulator):
         self.engine_simulator = engine_simulator
 
-    def check_engine_health(self):
-        if self.temperature > 40 or self.fuel_level < 20 or self.oil_level < 20 or self.battery_level < 20:
-            return False
-        else:
-            return True
+        self.temperatures = temperatures(self)
+        self.fuel = fuel(self)
+        self.oil = oil(self)
+        self.battery = battery(self)
+        
+
+    

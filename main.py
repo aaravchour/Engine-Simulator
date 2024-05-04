@@ -1,4 +1,3 @@
-import sys
 import time
 import random
 import playsound
@@ -15,7 +14,6 @@ from Systems.fuel import fuel
 from Systems.oil import oil
 from Systems.battery import battery
 from Systems.enginehealth import enginehealth
-from Systems.rpm import rpm
 
 
 
@@ -36,8 +34,7 @@ class EngineSimulator(QWidget):
         self.oil = oil(self)
         self.battery = battery(self)
         self.enginehealth = enginehealth(self)
-        self.rpm = rpm(self)
-        
+
 
     def initUI(self):
         self.setWindowTitle('Engine Simulator')
@@ -81,7 +78,13 @@ class EngineSimulator(QWidget):
         self.accelerator_pressed = False
         self.throttle = 0
 
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_rpm)
+        self.timer.start(100)
+
         self.throttle_slider.valueChanged.connect(self.update_throttle)
+
+        self.accelerator_button.clicked.connect(self.accelerator)
 
         self.show()
 
@@ -96,6 +99,10 @@ class EngineSimulator(QWidget):
         
         playsound.playsound('engine_sound.wav')
 
+        self.timer_throttle = QTimer()
+        self.timer_throttle.timeout.connect(self.update_rpm)
+        self.timer_throttle.start(1000)
+
     def stop(self):
         self.accelerator_button.show()
         self.stop_button.hide()
@@ -104,8 +111,30 @@ class EngineSimulator(QWidget):
 
     def update_throttle(self):
         self.throttle = self.throttle_slider.value()
+        self.timer_throttle = QTimer()
+        self.timer_throttle.timeout.connect(self.update_rpm)
+        self.timer_throttle.start(1000)  
+        
 
+    def update_rpm(self):
+        if self.throttle > 0:
+            self.engine_rpm = int(self.throttle / 100.0 * 8500)
+        elif self.throttle == 0:
+            self.engine_rpm -= random.randint(1, 4000)
 
+        if self.engine_rpm < 0:
+            self.engine_rpm = 0
+        elif self.engine_rpm > 8500:
+            self.engine_rpm = 8500
+
+        self.rpm_label.setText("RPM: " + str(self.engine_rpm))
+        self.rpm_meter.setValue(self.engine_rpm)
+
+        if self.accelerator_pressed:
+            self.temperatures.update_temperature()
+            self.fuel.update_fuel_level()
+            self.oil.update_oil_level()
+            self.battery.update_battery_level()
 
 
 if __name__ == '__main__':
