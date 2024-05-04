@@ -9,7 +9,12 @@ from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 import sys
 sys.path.insert(0, 'Systems')
 
-from Systems.realism_system import RealismSystem
+from Systems.basesystem import basesystem
+from Systems.temperatures import temperatures
+from Systems.fuel import fuel
+from Systems.oil import oil
+from Systems.battery import battery
+from Systems.enginehealth import enginehealth
 
 
 
@@ -24,7 +29,13 @@ class EngineSimulator(QWidget):
         self.oil_level = 100
         self.battery_level = 100
 
-        self.realism_system = RealismSystem(self)
+        self.basesystem = basesystem(self)
+        self.temperatures = temperatures(self)
+        self.fuel = fuel(self)
+        self.oil = oil(self)
+        self.battery = battery(self)
+        self.enginehealth = enginehealth(self)
+        
 
     def initUI(self):
         self.setWindowTitle('Engine Simulator')
