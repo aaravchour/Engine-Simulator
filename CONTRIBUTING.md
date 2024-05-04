@@ -9,7 +9,7 @@ Thank you for considering contributing to [Your Project Name]! We welcome contri
 2. **Clone your fork**: Clone your fork of the repository to your local machine using Git.
 
    ```bash
-   git clone https://github.com/aaravchour/Engine-Simulator
+   git clone https://github.com/[Your GitHub username]/[Your Project Name].git
    ```
 
 3. **Create a new branch**: Before you start working on your contribution, create a new branch based on the `main` or `master` branch. This will allow you to work on your changes without affecting the original codebase.
@@ -36,7 +36,7 @@ Thank you for considering contributing to [Your Project Name]! We welcome contri
 
 8. **Create a pull request**: Go to your fork of the repository on GitHub and create a new pull request. In the pull request description, explain the purpose of your contribution and any relevant details.
 
-9. **Wait for review**: After you submit your pull request, the project maintainers will review your contribution. They may ask for additional changes or provide feedback to help improve your contribution.
+9. **Make a forum post on Discord**: Join https://discord.gg/53RJ6wPwkB and post a forum with the tags of "Suggestion" or "Bugs", mention your pull request and wait for review, moderators will ask questions if necessary.
 
 10. **Make additional changes if necessary**: If the project maintainers request additional changes or provide feedback, make the necessary changes to your contribution and push them to your fork of the repository. Then, update your pull request to reflect the latest changes.
 
