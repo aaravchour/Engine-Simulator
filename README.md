@@ -23,7 +23,7 @@ For documentation, I wouldn't recommend PyQt5's website, if you have VSCode (whi
 
 # How to run main.py on your system
 
-Run the following command: `source path/to/venv/bin/action`
+Run the following command: `source path/to/venv/bin/activate`
 This is to make it accessible to any platform
 
 Then run `python3 main.py`
