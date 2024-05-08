@@ -15,3 +15,4 @@ class fuel:
             self.fuel_level = 0
         elif self.fuel_level > 100:
             self.fuel_level = 100
+

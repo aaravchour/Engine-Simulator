@@ -53,7 +53,7 @@ class ui(QWidget):
 
         self.timer_throttle = QTimer()
         self.timer_throttle.timeout.connect(self.update_rpm)
-        self.timer_throttle.start(1000)
+        self.timer_throttle.start(400)
 
     def stop(self):
         self.parent.accelerator_button.show()
@@ -130,7 +130,7 @@ class EngineSimulator(QWidget):
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_rpm)
-        self.timer.start(100)
+        self.timer.start(400)
 
     def update_throttle(self):
         self.throttle = self.ui.throttle_slider.value()
@@ -159,7 +159,3 @@ class EngineSimulator(QWidget):
         self.show()
 
 
-if __name__ == '__main__':
-    app = QApplication([])
-    ex = EngineSimulator()
-    app.exec_()
