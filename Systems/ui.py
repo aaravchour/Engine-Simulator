@@ -15,6 +15,7 @@ class ui(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
+        self.sound_handle = None
         self.initUI()
 
     def update_throttle(self):
@@ -70,7 +71,7 @@ class ui(QWidget):
             self.health_label.setText("Engine Health: OK")
             self.health_label.setStyleSheet("color: white")
             self.rpm_label.setStyleSheet("color:white")
-
+            
     def initUI(self):
         self.setWindowTitle('Engine Simulator')
 
