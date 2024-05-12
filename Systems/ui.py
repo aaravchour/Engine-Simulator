@@ -65,9 +65,11 @@ class ui(QWidget):
         if self.parent.engine_rpm >= 8500:
             self.health_label.setText("Engine Health: REDLINE")
             self.health_label.setStyleSheet("color: red")
+            self.rpm_label.setStyleSheet("color:red")
         else:
             self.health_label.setText("Engine Health: OK")
-            self.health_label.setStyleSheet("color: white   ")
+            self.health_label.setStyleSheet("color: white")
+            self.rpm_label.setStyleSheet("color:white")
 
     def initUI(self):
         self.setWindowTitle('Engine Simulator')
