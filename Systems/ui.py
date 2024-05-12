@@ -49,7 +49,7 @@ class ui(QWidget):
         self.vbox.addWidget(self.stop_button)
         self.stop_button.show()
 
-        playsound.playsound('engine_sound.wav')
+        playsound.playsound('sounds/engine_sound.wav')
 
         self.timer_throttle = QTimer()
         self.timer_throttle.timeout.connect(self.update_rpm)
