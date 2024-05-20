@@ -6,13 +6,7 @@ from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 import sys
 sys.path.insert(0, 'Systems')
 
-from Systems.basesystem import basesystem
-from Systems.temperatures import temperatures
-from Systems.fuel import fuel
-from Systems.oil import oil
-from Systems.battery import battery
-from Systems.enginehealth import enginehealth
-from Systems.ui import EngineSimulator
+from Systems.ui import ui
 
 
 
@@ -20,5 +14,5 @@ from Systems.ui import EngineSimulator
 
 if __name__ == '__main__':
     app = QApplication([])
-    ex = EngineSimulator()
+    ex = ui()
     app.exec_()
