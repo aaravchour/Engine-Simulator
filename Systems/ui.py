@@ -11,6 +11,7 @@ class ui(QWidget):
         self.throttle_value = 0 
         self.engine_rpm = 0
         self.accelerator_pressed = False
+        self.fuel_level = 100
 #
 #
 #
@@ -37,6 +38,7 @@ class ui(QWidget):
         self.rpm_meter.setValue(self.engine_rpm)
 
         self.redline()
+        self.update_fuel(self.engine_rpm)
 
 #
 #
@@ -84,6 +86,20 @@ class ui(QWidget):
             self.health_label.setStyleSheet("color: white")
             self.rpm_label.setStyleSheet("color:white")
 
+#
+#
+#
+#
+#
+#
+#
+# Fuel handler 
+    def update_fuel(self, value):
+        if self.throttle_value > 0:
+            self.fuel_level -= 0.01 
+            if self.fuel_level < 0:
+                self.fuel_level = 0  
+        self.fuel_label.setText("Fuel Level: " + str(round(self.fuel_level, 2)))
 #
 #
 #
