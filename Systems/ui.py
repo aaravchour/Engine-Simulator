@@ -1,38 +1,43 @@
-import playsound
+import sys
 import random
-from PyQt5.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget, QPushButton, QSlider, QProgressBar
+from PyQt5.QtWidgets import (
+    QApplication,
+    QLabel,
+    QVBoxLayout,
+    QWidget,
+    QPushButton,
+    QSlider,
+    QProgressBar,
+)
 from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtMultimedia import QSound
 
-class ui(QWidget):
+
+class EngineSimulator(QWidget):
     def __init__(self):
         super().__init__()
-        self.sound_handle = None
         self.initUI()
-        self.throttle_value = 0 
+        self.throttle_value = 0
         self.engine_rpm = 0
         self.accelerator_pressed = False
-        self.fuel_level = 100
-#
-#
-#
-#
-#
-#
-#
-# RPM Handler
+        self.fuel_level = 100.0
+        self.battery_level = 100.0
+        self.timer_throttle = QTimer()
+        self.timer_throttle.timeout.connect(self.update_rpm)
+        self.timer_battery = QTimer()
+        self.timer_battery.timeout.connect(self.update_battery)
+        self.sound_handle = QSound("sounds/engine_sound.wav")
+
     def update_throttle(self, value):
-        self.throttle_value = value  
+        self.throttle_value = value
 
     def update_rpm(self):
         if self.throttle_value > 0:
             self.engine_rpm = int(self.throttle_value / 100.0 * 8500)
-        elif self.throttle_value == 0:
+        else:
             self.engine_rpm -= random.randint(1, 4000)
-
-        if self.engine_rpm < 0:
-            self.engine_rpm = 0
-        elif self.engine_rpm > 8500:
-            self.engine_rpm = 8500
+            if self.engine_rpm < 0:
+                self.engine_rpm = 0
 
         self.rpm_label.setText("RPM: " + str(self.engine_rpm))
         self.rpm_meter.setValue(self.engine_rpm)
@@ -40,14 +45,6 @@ class ui(QWidget):
         self.redline()
         self.update_fuel(self.engine_rpm)
 
-#
-#
-#
-#
-#
-#
-#
-# Start button + Stop button
     def accelerator(self):
         self.accelerator_pressed = True
         self.accelerator_button.setEnabled(False)
@@ -57,59 +54,59 @@ class ui(QWidget):
         self.vbox.addWidget(self.stop_button)
         self.stop_button.show()
 
-        playsound.playsound('sounds/engine_sound.wav')
+        self.sound_handle.play()
 
-        self.timer_throttle = QTimer()
-        self.timer_throttle.timeout.connect(self.update_rpm)
         self.timer_throttle.start(400)
+        self.timer_battery.start(1000)
 
     def stop(self):
         self.accelerator_button.show()
         self.stop_button.hide()
         self.accelerator_button.setEnabled(True)
         self.accelerator_pressed = False
-#
-#
-#
-#
-#
-#
-#
-# Redline handler
+        self.timer_throttle.stop()
+        self.timer_battery.stop()
+        self.sound_handle.stop()
+
     def redline(self):
         if self.engine_rpm >= 8500:
             self.health_label.setText("Engine Health: REDLINE")
             self.health_label.setStyleSheet("color: red")
-            self.rpm_label.setStyleSheet("color:red")
+            self.rpm_label.setStyleSheet("color: red")
         else:
             self.health_label.setText("Engine Health: OK")
             self.health_label.setStyleSheet("color: white")
-            self.rpm_label.setStyleSheet("color:white")
+            self.rpm_label.setStyleSheet("color: white")
 
-#
-#
-#
-#
-#
-#
-#
-# Fuel handler 
     def update_fuel(self, value):
         if self.throttle_value > 0:
-            self.fuel_level -= 0.01 
+            self.fuel_level -= 0.01
             if self.fuel_level < 0:
-                self.fuel_level = 0  
+                self.fuel_level = 0
         self.fuel_label.setText("Fuel Level: " + str(round(self.fuel_level, 2)))
-#
-#
-#
-#
-#
-#
-#
-# UI Handler
+
+    def update_battery(self):
+        if self.throttle_value > 0:
+            self.battery_level += 0.01
+            if self.battery_level > 100:
+                self.battery_level = 100
+        else:
+            self.battery_level -= 0.01
+            if self.battery_level < 0:
+                self.battery_level = 0
+        self.battery_label.setText(
+            "Battery Level: " + str(round(self.battery_level, 2))
+        )
+        self.update_battery_status()
+
+    def update_battery_status(self):
+        if self.throttle_value > 0:
+            self.battery_status_label.setText("Battery Status: CHARGING")
+        else:
+            self.battery_status_label.setText("Battery Status: DISCHARGING")
+
     def initUI(self):
-        self.setWindowTitle('Engine Simulator')
+        self.setWindowTitle("Engine Simulator")
 
         self.vbox = QVBoxLayout(self)
 
@@ -127,6 +124,9 @@ class ui(QWidget):
 
         self.battery_label = QLabel("Battery Level: 0", self)
         self.vbox.addWidget(self.battery_label)
+
+        self.battery_status_label = QLabel("Battery Status: STANDBY", self)
+        self.vbox.addWidget(self.battery_status_label)
 
         self.health_label = QLabel("Engine Health: OK", self)
         self.vbox.addWidget(self.health_label)
@@ -150,11 +150,10 @@ class ui(QWidget):
         self.throttle_slider.valueChanged.connect(self.update_throttle)
 
         self.setMinimumWidth(400)
-
         self.show()
 
-if __name__ == '__main__':
-    import sys
+
+if __name__ == "__main__":
     app = QApplication(sys.argv)
-    ex = ui()
+    ex = EngineSimulator()
     sys.exit(app.exec_())
