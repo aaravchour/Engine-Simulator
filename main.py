@@ -99,6 +99,7 @@ class EngineSimulator(QWidget):
     def accelerator(self):
         self.accelerator_pressed = True
         self.timer_throttle.start(50)
+        self.timer_battery.start(100)
 
     def accelerator_released(self):
         self.accelerator_pressed = False
@@ -132,11 +133,11 @@ class EngineSimulator(QWidget):
 
     def update_battery(self):
         if self.accelerator_pressed:
-            self.battery_level += 0.01
+            self.battery_level += 0.1
             if self.battery_level > 100:
                 self.battery_level = 100
         else:
-            self.battery_level -= 0.01
+            self.battery_level -= 0.1
             if self.battery_level < 0:
                 self.battery_level = 0
         self.battery_label.setText(
@@ -165,10 +166,10 @@ class EngineSimulator(QWidget):
         self.temperature_label = QLabel("Temperature: 0", self)
         self.vbox.addWidget(self.temperature_label)
 
-        self.fuel_label = QLabel("Fuel Level: 0", self)
+        self.fuel_label = QLabel("Fuel Level: 100.0", self)
         self.vbox.addWidget(self.fuel_label)
 
-        self.battery_label = QLabel("Battery Level: 0", self)
+        self.battery_label = QLabel("Battery Level: 100.0", self)
         self.vbox.addWidget(self.battery_label)
 
         self.battery_status_label = QLabel("Battery Status: STANDBY", self)
