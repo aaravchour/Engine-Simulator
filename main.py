@@ -6,7 +6,6 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
     QPushButton,
-    QSlider,
     QProgressBar,
 )
 from PyQt5.QtCore import QTimer, Qt
@@ -28,7 +27,6 @@ class EngineSimulator(QWidget):
         self.timer_throttle.timeout.connect(self.update_rpm)
         self.timer_battery = QTimer()
         self.timer_battery.timeout.connect(self.update_battery)
-        self.sound_handle = None
         self.initUI()
 
     def draw_rpm_meter(self, rpm):
@@ -60,13 +58,11 @@ class EngineSimulator(QWidget):
             y_end = centre_y - radius * sin(radians(angle))
             draw.line((x_start, y_start, x_end, y_end), fill=(0, 0, 0), width=2)
 
-            # Draw numbers
             rpm_value = int(self.max_rpm / num_markings * i)
             text_x = centre_x + (radius - 40) * cos(radians(angle)) - 10
             text_y = centre_y - (radius - 40) * sin(radians(angle)) - 10
             draw.text((text_x, text_y), str(rpm_value), fill=(0, 0, 0), font=font)
 
-        # Calculate the needle position based on RPM
         angle = 180 - (rpm * 180 / self.max_rpm)
         x_end = centre_x + (radius - 20) * cos(radians(angle))
         y_end = centre_y - (radius - 20) * sin(radians(angle))
@@ -75,10 +71,16 @@ class EngineSimulator(QWidget):
         return img
 
     def update_rpm(self):
-        if self.throttle_value > 0:
+        if self.accelerator_pressed:
+            self.throttle_value += 1
+            if self.throttle_value > 100:
+                self.throttle_value = 100
             self.engine_rpm = int(self.throttle_value / 100.0 * self.max_rpm)
         else:
-            self.engine_rpm -= random.randint(1, 4000)
+            self.throttle_value -= 1
+            if self.throttle_value < 0:
+                self.throttle_value = 0
+            self.engine_rpm -= random.randint(1, 100)
             if self.engine_rpm < 0:
                 self.engine_rpm = 0
 
@@ -94,23 +96,12 @@ class EngineSimulator(QWidget):
         self.redline()
         self.update_fuel(self.engine_rpm)
 
-    def update_throttle(self, value):
-        self.throttle_value = value
-
     def accelerator(self):
         self.accelerator_pressed = True
-        self.accelerator_button.setEnabled(False)
-        self.accelerator_button.hide()
-        self.stop_button = QPushButton("Stop Engine", self)
-        self.stop_button.clicked.connect(self.stop)
-        self.vbox.addWidget(self.stop_button)
-        self.stop_button.show()
+        self.timer_throttle.start(50)
 
-        if self.sound_handle:
-            self.sound_handle.play()
-
-        self.timer_throttle.start(1)
-        self.timer_battery.start(1000)
+    def accelerator_released(self):
+        self.accelerator_pressed = False
 
     def stop(self):
         self.accelerator_button.show()
@@ -119,8 +110,6 @@ class EngineSimulator(QWidget):
         self.accelerator_pressed = False
         self.timer_throttle.stop()
         self.timer_battery.stop()
-        if self.sound_handle:
-            self.sound_handle.stop()
 
     def redline(self):
         if self.engine_rpm >= self.max_rpm:
@@ -133,14 +122,16 @@ class EngineSimulator(QWidget):
             self.rpm_label.setStyleSheet("color: white")
 
     def update_fuel(self, value):
-        if self.throttle_value > 0:
-            self.fuel_level -= 0.01
+        if self.accelerator_pressed:
+            self.fuel_level -= 0.001
             if self.fuel_level < 0:
                 self.fuel_level = 0
         self.fuel_label.setText("Fuel Level: " + str(round(self.fuel_level, 2)))
+        if self.fuel_level == 0:
+            self.engine_rpm = 0
 
     def update_battery(self):
-        if self.throttle_value > 0:
+        if self.accelerator_pressed:
             self.battery_level += 0.01
             if self.battery_level > 100:
                 self.battery_level = 100
@@ -154,7 +145,7 @@ class EngineSimulator(QWidget):
         self.update_battery_status()
 
     def update_battery_status(self):
-        if self.throttle_value > 0:
+        if self.accelerator_pressed:
             self.battery_status_label.setText("Battery Status: CHARGING")
         else:
             self.battery_status_label.setText("Battery Status: DISCHARGING")
@@ -186,13 +177,8 @@ class EngineSimulator(QWidget):
         self.health_label = QLabel("Engine Health: OK", self)
         self.vbox.addWidget(self.health_label)
 
-        self.accelerator_button = QPushButton("Start Engine", self)
+        self.accelerator_button = QPushButton("Accelerator", self)
         self.vbox.addWidget(self.accelerator_button)
-
-        self.throttle_slider = QSlider(Qt.Vertical)
-        self.throttle_slider.setMinimum(0)
-        self.throttle_slider.setMaximum(100)
-        self.vbox.addWidget(self.throttle_slider)
 
         self.rpm_meter = QProgressBar(self)
         self.rpm_meter.setMinimum(0)
@@ -204,8 +190,8 @@ class EngineSimulator(QWidget):
 
         self.setLayout(self.vbox)
 
-        self.accelerator_button.clicked.connect(self.accelerator)
-        self.throttle_slider.valueChanged.connect(self.update_throttle)
+        self.accelerator_button.pressed.connect(self.accelerator)
+        self.accelerator_button.released.connect(self.accelerator_released)
 
         self.setMinimumWidth(400)
         self.show()
