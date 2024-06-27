@@ -1,5 +1,4 @@
 import sys
-import random
 from PyQt5.QtWidgets import (
     QApplication,
     QLabel,
@@ -26,6 +25,7 @@ class EngineSimulator(QWidget):
         self.gear = 1
         self.speed = 0
         self.max_gears = 6
+        self.gear_ratios = [0, 3.0, 2.0, 1.5, 1.2, 1.0, 0.8]
         self.timer_throttle = QTimer()
         self.timer_throttle.timeout.connect(self.update_rpm)
         self.timer_battery = QTimer()
@@ -75,17 +75,13 @@ class EngineSimulator(QWidget):
 
     def update_rpm(self):
         if self.accelerator_pressed:
-            self.throttle_value += 1
-            if self.throttle_value > 100:
-                self.throttle_value = 100
-            self.engine_rpm = int(self.throttle_value / 100.0 * self.max_rpm)
+            self.throttle_value = min(self.throttle_value + 1, 100)
         else:
-            self.throttle_value -= 1
-            if self.throttle_value < 0:
-                self.throttle_value = 0
-            self.engine_rpm -= self.max_rpm // 100  # Decrease by a fixed small amount
-            if self.engine_rpm < 0:
-                self.engine_rpm = 0
+            self.throttle_value = max(self.throttle_value - 1, 0)
+
+        self.engine_rpm = int(
+            self.throttle_value / 100.0 * self.max_rpm * self.gear_ratios[self.gear]
+        )
 
         self.rpm_label.setText("RPM: " + str(self.engine_rpm))
         self.rpm_meter.setValue(self.engine_rpm)
@@ -107,27 +103,33 @@ class EngineSimulator(QWidget):
 
     def accelerator_released(self):
         self.accelerator_pressed = False
+        self.timer_throttle.start(25)
 
     def brake(self):
         self.accelerator_pressed = False
+        self.throttle_value = 0
         self.engine_rpm = 0
         self.update_rpm()
 
     def increase_gear(self):
         if self.gear < self.max_gears:
             self.gear += 1
-            self.engine_rpm = int(self.engine_rpm * 0.7)
+            self.adjust_rpm_for_gear_change()
             self.update_speed()
             self.gear_label.setText(f"Gear: {self.gear}")
 
     def decrease_gear(self):
         if self.gear > 1:
             self.gear -= 1
-            self.engine_rpm = int(self.engine_rpm * 1.3)
-            if self.engine_rpm > self.max_rpm:
-                self.engine_rpm = self.max_rpm
+            self.adjust_rpm_for_gear_change()
             self.update_speed()
             self.gear_label.setText(f"Gear: {self.gear}")
+
+    def adjust_rpm_for_gear_change(self):
+        self.engine_rpm = int(
+            self.throttle_value / 100.0 * self.max_rpm * self.gear_ratios[self.gear]
+        )
+        self.engine_rpm = max(0, min(self.engine_rpm, self.max_rpm))
 
     def stop(self):
         self.accelerator_button.show()
@@ -177,7 +179,7 @@ class EngineSimulator(QWidget):
             self.battery_status_label.setText("Battery Status: DISCHARGING")
 
     def update_speed(self):
-        self.speed = (self.engine_rpm / 1000) * self.gear
+        self.speed = (self.engine_rpm / 1000) * self.gear_ratios[self.gear]
         self.speed_label.setText(f"Speed: {round(self.speed, 2)} mph")
 
     def update_temperature(self):
@@ -208,7 +210,7 @@ class EngineSimulator(QWidget):
         self.rpm_label = QLabel("RPM: 0", self)
         self.vbox.addWidget(self.rpm_label)
 
-        self.speed_label = QLabel("Speed: 0 km/h", self)
+        self.speed_label = QLabel("Speed: 0 mph", self)
         self.vbox.addWidget(self.speed_label)
 
         self.gear_label = QLabel("Gear: 1", self)
